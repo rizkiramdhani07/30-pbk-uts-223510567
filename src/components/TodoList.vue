@@ -1,58 +1,63 @@
 <template>
-  <div class="todos">
-    <h1>Daftar Kegiatan Anda</h1>
-    <p class="author">created by Muhammad Rizki Ramadhani</p>
-
-    <div class="filter-buttons">
-      <button @click="filter = 'all'" :class="{ active: filter === 'all' }">Semua</button>
-      <button @click="filter = 'done'" :class="{ active: filter === 'done' }">Selesai</button>
-      <button @click="filter = 'pending'" :class="{ active: filter === 'pending' }">Belum Selesai</button>
-    </div>
-
-    <div class="add-todo">
-      <input type="text" :value="newTodo" @input="updateNewTodo" placeholder="Masukkan item kegiatan baru" />
-      <button @click="addTodo">Tambah</button>
-    </div>
-    <hr>
-    <ul>
-      <li v-for="(todo, index) in filteredTodos" :key="index" :class="{ done: todo.done }">
-        <input type="checkbox" v-model="todo.done" />
-        <span>{{ todo.text }}</span>
-        <button @click="removeTodo(index)">Hapus</button>
-        <hr>
-      </li>
-    </ul>
-  </div>
+  <q-list bordered padding class="todo-list">
+    <TodoItem v-for="(todo, index) in todos" :key="index" :todo="todo" :index="index" @remove="removeTodo(index)" @toggle="animateToggle" />
+  </q-list>
 </template>
 
 <script>
+import TodoItem from './TodoItem.vue';
+
 export default {
-  props: ['todos', 'filter', 'newTodo'],
+  props: {
+    todos: Array,
+  },
+  components: {
+    TodoItem,
+  },
   methods: {
-    updateNewTodo(event) {
-      this.$emit('update:newTodo', event.target.value);
-    },
-    addTodo() {
-      this.$emit('addTodo');
-    },
     removeTodo(index) {
-      this.$emit('removeTodo', index);
+      this.$emit('remove-todo', index);
+    },
+    animateToggle() {
+      const notification = document.createElement('div');
+      notification.className = 'notification toggled';
+      notification.textContent = 'Item toggled';
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 2000);
     }
   },
-  computed: {
-    filteredTodos() {
-      if (this.filter === 'all') {
-        return this.todos;
-      } else if (this.filter === 'done') {
-        return this.todos.filter(todo => todo.done);
-      } else if (this.filter === 'pending') {
-        return this.todos.filter(todo => !todo.done);
-      }
-    }
-  }
 };
 </script>
 
 <style scoped>
-/* Your CSS styles here */
+.todo-list {
+  padding: 0;
+  background: #E8F5E9; /* Light Green */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #388E3C; /* Dark Green */
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 1000;
+  animation: fadeInOut 2s;
+}
+
+.notification.toggled {
+  background: #34A853; /* Green */
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
 </style>
